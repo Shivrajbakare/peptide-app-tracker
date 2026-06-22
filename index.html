@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f2ebdd">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#111b15">
+  <meta name="description" content="The Peptide App - Track doses, calculate reconstitution, and monitor outcomes privately.">
+  <title>The Peptide App: Tracker MVP</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Load Peptide scientific database first -->
+  <script src="data/peptides.js"></script>
+</head>
+<body>
+
+  <!-- Simulated Desktop Environment -->
+  <div class="desktop-container">
+    <div class="sim-header">
+      <img src="assets/app-icon.png" alt="Logo" class="sim-logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\' fill=\'%23c75f46\'><circle cx=\'50\' cy=\'50\' r=\'40\'/><path d=\'M50 30 v40 M30 50 h40\' stroke=\'white\' stroke-width=\'8\'/></svg>'">
+      <h1>The Peptide App</h1>
+      <span style="font-size: 0.75rem; background: rgba(255,255,255,0.15); padding: 2px 8px; border-radius: 20px; font-weight: 700; text-transform: uppercase;">MVP</span>
+    </div>
+
+    <!-- Simulated iPhone 14 Device Frame -->
+    <div class="iphone-frame">
+      <!-- Simulated Apple Dynamic Island -->
+      <div class="iphone-island"></div>
+
+      <!-- App Screen Content -->
+      <div class="iphone-screen">
+        
+        <!-- Canvas for particle confetti animations -->
+        <canvas id="confetti-canvas"></canvas>
+
+        <!-- Simulated iOS Status Bar -->
+        <div class="status-bar">
+          <span id="status-time">09:41</span>
+          <div class="status-bar-icons">
+            <!-- Signal Icon SVG -->
+            <svg class="status-icon" viewBox="0 0 16 10" fill="currentColor">
+              <rect x="0" y="7" width="2.5" height="3" rx="0.5"/>
+              <rect x="3.5" y="5" width="2.5" height="5" rx="0.5"/>
+              <rect x="7" y="3" width="2.5" height="7" rx="0.5"/>
+              <rect x="10.5" y="0" width="2.5" height="10" rx="0.5"/>
+            </svg>
+            <!-- Wifi Icon SVG -->
+            <svg class="status-icon" viewBox="0 0 16 12" fill="currentColor">
+              <path d="M8 12a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm-3.5-5.5a5 5 0 0 1 7 0 1 1 0 0 1-1.4 1.4 3 3 0 0 0-4.2 0 1 1 0 0 1-1.4-1.4zm-3-3a9 9 0 0 1 13 0 1 1 0 0 1-1.4 1.4 7 7 0 0 0-10.2 0 1 1 0 0 1-1.4-1.4z"/>
+            </svg>
+            <!-- Battery Icon SVG -->
+            <svg class="status-icon" viewBox="0 0 20 10" fill="currentColor">
+              <rect x="0" y="0" width="16" height="10" rx="2.5" fill="none" stroke="currentColor" stroke-width="1"/>
+              <rect x="2" y="2" width="10" height="6" rx="1.5"/>
+              <path d="M17 3.5c.7 0 1 .3 1 1.5v2c0 1.2-.3 1.5-1 1.5"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- 0. Graceful Loading Screen State -->
+        <div id="loading-screen" class="loading-screen">
+          <div class="spinner"></div>
+          <p style="margin-top: 15px; font-weight: 700; font-family: var(--font-heading); font-size: 0.95rem; color: var(--text-secondary);">initializing outcomes engine...</p>
+        </div>
+
+        <!-- 1. Interactive 3-Step Onboarding Overlay -->
+        <div id="onboarding-overlay" class="onboarding-screen hidden">
+          <!-- Step 1: Goal Matcher -->
+          <div id="onboard-step-1" class="onboarding-step active">
+            <div class="onboard-header">
+              <img src="assets/app-icon.png" alt="Icon" class="onboard-logo-large" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\' fill=\'%23c75f46\'><circle cx=\'50\' cy=\'50\' r=\'40\'/><path d=\'M50 30 v40 M30 50 h40\' stroke=\'white\' stroke-width=\'8\'/></svg>'">
+              <h2 class="onboard-title">Find peptides for your goals</h2>
+              <p class="onboard-subtitle">Select what you would like to target or improve first.</p>
+            </div>
+            <div class="onboard-body">
+              <div class="goal-options">
+                <div class="goal-option" data-goal="healing">
+                  <div class="goal-emoji">🩹</div>
+                  <div class="goal-info">
+                    <span class="goal-name">Healing & Recovery</span>
+                    <span class="goal-desc">Repair joint pain, tendons, and tissue injury.</span>
+                  </div>
+                </div>
+                <div class="goal-option" data-goal="longevity">
+                  <div class="goal-emoji">🧬</div>
+                  <div class="goal-info">
+                    <span class="goal-name">Longevity & Sleep</span>
+                    <span class="goal-desc">Promote deep sleep, growth hormones, cellular vitality.</span>
+                  </div>
+                </div>
+                <div class="goal-option" data-goal="fat-loss">
+                  <div class="goal-emoji">🔥</div>
+                  <div class="goal-info">
+                    <span class="goal-name">Fat Loss & Metabolism</span>
+                    <span class="goal-desc">Optimize appetite control, insulin, metabolic rate.</span>
+                  </div>
+                </div>
+                <div class="goal-option" data-goal="skin">
+                  <div class="goal-emoji">✨</div>
+                  <div class="goal-info">
+                    <span class="goal-name">Skin & Hair Elasticity</span>
+                    <span class="goal-desc">Enhance collagen synthesis and skin healing.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="onboard-footer">
+              <div class="progress-dots">
+                <span class="progress-dot active"></span>
+                <span class="progress-dot"></span>
+                <span class="progress-dot"></span>
+              </div>
+              <button class="btn btn-primary btn-disabled" id="btn-onboard-1">Next</button>
+            </div>
+          </div>
+
+          <!-- Step 2: Experience level -->
+          <div id="onboard-step-2" class="onboarding-step">
+            <div class="onboard-header">
+              <h2 class="onboard-title">Peptide experience</h2>
+              <p class="onboard-subtitle">This helps us tailor safe guides and dosage ranges.</p>
+            </div>
+            <div class="onboard-body">
+              <div class="exp-options">
+                <div class="exp-option" data-exp="beginner">
+                  <span class="exp-title">Beginner 🧪</span>
+                  <p class="exp-desc">I have never reconstituted or injected peptides before. I want simple, foolproof guidance.</p>
+                </div>
+                <div class="exp-option" data-exp="intermediate">
+                  <span class="exp-title">Intermediate 🔬</span>
+                  <p class="exp-desc">I understand dilution math and injections, but want structured protocol tracking.</p>
+                </div>
+                <div class="exp-option" data-exp="advanced">
+                  <span class="exp-title">Advanced / Veteran 🧬</span>
+                  <p class="exp-desc">I run complex multi-peptide cycles and want to build advanced custom schedules.</p>
+                </div>
+              </div>
+            </div>
+            <div class="onboard-footer">
+              <button class="btn btn-secondary" id="btn-onboard-back-2">Back</button>
+              <div class="progress-dots">
+                <span class="progress-dot active"></span>
+                <span class="progress-dot active"></span>
+                <span class="progress-dot"></span>
+              </div>
+              <button class="btn btn-primary btn-disabled" id="btn-onboard-2">Next</button>
+            </div>
+          </div>
+
+          <!-- Step 3: Name & Consent -->
+          <div id="onboard-step-3" class="onboarding-step">
+            <div class="onboard-header">
+              <h2 class="onboard-title">Set up your profile</h2>
+              <p class="onboard-subtitle">Your data is stored 100% locally and privately on your device.</p>
+            </div>
+            <div class="onboard-body">
+              <div class="form-group">
+                <label class="form-label" for="username-input">Your First Name</label>
+                <input type="text" id="username-input" class="form-input" placeholder="e.g. Alex" autocomplete="off">
+              </div>
+              <div style="background-color: var(--bg-tertiary); padding: 14px; border-radius: 14px; font-size: 0.75rem; color: var(--text-secondary); line-height: 1.4; display: flex; gap: 10px; align-items: flex-start;">
+                <span style="font-size: 1.1rem;">🔒</span>
+                <p><strong>Private by Default:</strong> We don't sell your health data. The Peptide App LLC does not have databases; all metrics, logs, and settings live locally inside your browser's memory.</p>
+              </div>
+            </div>
+            <div class="onboard-footer">
+              <button class="btn btn-secondary" id="btn-onboard-back-3">Back</button>
+              <div class="progress-dots">
+                <span class="progress-dot active"></span>
+                <span class="progress-dot active"></span>
+                <span class="progress-dot active"></span>
+              </div>
+              <button class="btn btn-primary" id="btn-onboard-3">Get Started</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Main App Screen Switching Content -->
+        <div class="screen-content">
+
+          <!-- TAB 1: Today Dashboard -->
+          <div id="screen-today" class="screen active">
+            <div class="screen-header">
+              <div>
+                <span class="profile-goal-badge" id="dash-goal">Recovery Mode</span>
+                <h1 class="screen-title" id="dash-greeting">Hey, Alex</h1>
+                <p class="screen-subtitle" id="dash-date">Monday, June 22</p>
+              </div>
+              <div class="profile-avatar" id="dash-avatar" style="cursor: pointer;">A</div>
+            </div>
+
+            <!-- Weekly Progress Ring Center -->
+            <div class="dashboard-ring-container">
+              <div class="dashboard-ring">
+                <!-- Circular progress ring -->
+                <svg width="90" height="90" viewBox="0 0 96 96">
+                  <circle cx="48" cy="48" r="40" fill="none" stroke="var(--bg-tertiary)" stroke-width="8"></circle>
+                  <circle id="dash-progress-circle" cx="48" cy="48" r="40" fill="none" stroke="var(--success-color)" stroke-width="8" stroke-dasharray="251.2" stroke-dashoffset="251.2" stroke-linecap="round" transform="rotate(-90 48 48)"></circle>
+                </svg>
+                <div class="ring-percent" id="dash-progress-percent">0%</div>
+              </div>
+              <div class="dashboard-stats">
+                <h3 class="dashboard-stats-title" id="dash-progress-title">Starting Today</h3>
+                <p class="dashboard-stats-desc" id="dash-progress-subtitle">Log your first doses to advance your daily ring.</p>
+              </div>
+            </div>
+
+            <!-- Streak Banner -->
+            <div class="streak-banner" id="dash-streak-banner" style="display: none;">
+              <span class="streak-flame">🔥</span>
+              <div class="streak-info">
+                <h4 id="dash-streak-days">1 Day Streak!</h4>
+                <p>Consistency is key to peptide cellular outcomes. Keep it going!</p>
+              </div>
+            </div>
+
+            <!-- Today's Checklist -->
+            <div class="checklist-title">
+              <span>TODAY'S REGIMEN</span>
+              <span id="checklist-count" style="font-weight: 800;">0 / 0</span>
+            </div>
+
+            <!-- Dynamic checklist list container -->
+            <div id="dash-checklist">
+              <!-- Rendered dynamically in app.js -->
+            </div>
+
+            <!-- Active Protocol Overview Card -->
+            <div class="card" id="dash-active-protocol-card" style="margin-top: 15px; border-color: rgba(199, 95, 70, 0.2);">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                <h4 style="font-family: var(--font-heading); font-weight: 800; font-size: 0.95rem; color: var(--accent-color);">ACTIVE PROTOCOL</h4>
+                <span class="badge-tag" id="dash-protocol-weeks" style="background-color: var(--bg-tertiary);">Week 1 of 8</span>
+              </div>
+              <h3 style="font-family: var(--font-heading); font-weight: 800; font-size: 1.1rem; margin-bottom: 4px;" id="dash-protocol-name">Wolverine Recovery Stack</h3>
+              <p style="font-size: 0.78rem; color: var(--text-secondary); line-height: 1.4;" id="dash-protocol-desc">Daily BPC-157 healing + weekly TB-500 anti-scar tissue rebuild.</p>
+            </div>
+          </div>
+
+          <!-- TAB 2: Explore Protocols -->
+          <div id="screen-explore" class="screen">
+            <div class="screen-header">
+              <div>
+                <h1 class="screen-title">Protocols</h1>
+                <p class="screen-subtitle">Curated schedules matching your target health goals</p>
+              </div>
+            </div>
+
+            <!-- Goal Filters -->
+            <div class="chip-container" id="explore-chips">
+              <span class="chip active" data-filter="all">All Goals</span>
+              <span class="chip" data-filter="healing">🩹 Healing</span>
+              <span class="chip" data-filter="longevity">🧬 Longevity</span>
+              <span class="chip" data-filter="fat-loss">🔥 Fat Loss</span>
+              <span class="chip" data-filter="skin">✨ Skin</span>
+            </div>
+
+            <!-- Create Custom Trigger Card -->
+            <div class="builder-trigger-card" id="btn-custom-protocol-trigger">
+              <span class="builder-trigger-icon">➕</span>
+              <h4 class="builder-trigger-title">Create Custom Protocol</h4>
+              <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">Design a multi-phase regimen with custom doses.</p>
+            </div>
+
+            <div class="checklist-title">CURATED EXPERT PROTOCOLS</div>
+
+            <!-- Protocols List Grid -->
+            <div id="explore-protocols-list">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- TAB 3: Reconstitution Calculator -->
+          <div id="screen-calculator" class="screen">
+            <div class="screen-header">
+              <div>
+                <h1 class="screen-title">Reconstitution</h1>
+                <p class="screen-subtitle">Eliminate math errors & guide syringe drawing</p>
+              </div>
+            </div>
+
+            <div class="calc-container">
+              <!-- Outputs Results Card -->
+              <div class="calc-results-card">
+                <span class="calc-result-label">Units to Draw</span>
+                <div class="calc-result-number" id="calc-units-result">10.0</div>
+                <span class="calc-result-label" style="font-size: 0.7rem; opacity: 0.8;" id="calc-volume-result">(0.10 ml)</span>
+                <div>
+                  <div class="calc-result-instruction" id="calc-instruction-text">Draw to the 10 unit mark on your syringe.</div>
+                </div>
+              </div>
+
+              <!-- Syringe SVG Visualizer -->
+              <div class="syringe-viewer">
+                <span class="syringe-title">Visual Draw Guide</span>
+                <div class="syringe-svg-container">
+                  <svg id="syringe-svg" width="340" height="80" viewBox="0 0 340 80" style="overflow: visible;">
+                    <!-- Syringe Needle -->
+                    <rect x="0" y="38" width="20" height="4" fill="#a19489" />
+                    <!-- Syringe Hub -->
+                    <polygon points="20,30 30,30 30,50 20,50" fill="#c75f46" />
+                    <!-- Barrel Body outline -->
+                    <rect x="30" y="20" width="250" height="40" fill="none" stroke="#61554d" stroke-width="2.5" />
+                    
+                    <!-- Syringe Fluid shading -->
+                    <rect id="syringe-fluid" x="30" y="21" width="100" height="38" fill="rgba(199, 95, 70, 0.25)" />
+                    
+                    <!-- Markings (Tick lines on syringe) -->
+                    <!-- We will render these dynamically, or static guides -->
+                    <g id="syringe-tick-marks">
+                      <!-- Drawn via JS for accurate spacing based on syringe capacity -->
+                    </g>
+                    
+                    <!-- Plunger seal (black rubber tip) -->
+                    <rect id="syringe-seal" x="130" y="21" width="12" height="38" fill="#111" />
+                    <line id="syringe-seal-line" x1="130" y1="20" x2="130" y2="60" stroke="#000" stroke-width="2" />
+                    
+                    <!-- Plunger Plastic shaft -->
+                    <rect id="syringe-plunger-shaft" x="142" y="34" width="180" height="12" fill="#c75f46" opacity="0.8" />
+                    <!-- Plunger thumb rest -->
+                    <rect id="syringe-thumb-rest" x="322" y="15" width="8" height="50" fill="#b55038" rx="2" />
+                  </svg>
+                </div>
+                <p id="syringe-warning" style="color: var(--accent-color); font-size: 0.72rem; font-weight: 700; margin-top: 8px; text-align: center; display: none;">⚠️ Warning: Calculated volume exceeds syringe size!</p>
+              </div>
+
+              <!-- Inputs Fields -->
+              <div class="card">
+                <h3 style="font-family: var(--font-heading); font-weight: 800; font-size: 0.95rem; margin-bottom: 15px; color: var(--accent-color);">Calculator Parameters</h3>
+                
+                <div class="calc-grid">
+                  <div class="form-group">
+                    <label class="form-label" style="font-size: 0.7rem;">Peptide Vial (mg)</label>
+                    <input type="number" id="calc-vial-size" class="form-input" style="padding: 10px;" value="5" step="1" min="0.1">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" style="font-size: 0.7rem;">BAC Water (ml)</label>
+                    <input type="number" id="calc-bac-water" class="form-input" style="padding: 10px;" value="2" step="0.5" min="0.1">
+                  </div>
+                </div>
+
+                <div class="calc-grid">
+                  <div class="form-group">
+                    <label class="form-label" style="font-size: 0.7rem;">Desired Dose (mcg)</label>
+                    <input type="number" id="calc-dose" class="form-input" style="padding: 10px;" value="250" step="50" min="1">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" style="font-size: 0.7rem;">Syringe Size</label>
+                    <select id="calc-syringe" class="form-input" style="padding: 10px; font-size: 0.85rem; font-weight: 700;">
+                      <option value="100">100 Units (1.0ml)</option>
+                      <option value="50">50 Units (0.5ml)</option>
+                      <option value="30">30 Units (0.3ml)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Reconstitution Guide Accordion -->
+              <div class="checklist-title">GUIDED RECONSTITUTION TECHNIQUE</div>
+              
+              <div class="accordion-item">
+                <div class="accordion-header">
+                  <span>Step 1: Sanitize Work Space</span>
+                  <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                  Clean a flat surface with an isopropyl alcohol wipe. Wash your hands thoroughly. Lay out your peptide vial, Bacteriostatic (BAC) water vial, syringe, and alcohol pads.
+                </div>
+              </div>
+
+              <div class="accordion-item">
+                <div class="accordion-header">
+                  <span>Step 2: Prep Vial Caps</span>
+                  <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                  Pop off the plastic caps of both the peptide vial and the BAC water vial. Wipe the exposed rubber stoppers of both vials with a fresh alcohol pad. Allow them to air-dry for 10 seconds.
+                </div>
+              </div>
+
+              <div class="accordion-item">
+                <div class="accordion-header">
+                  <span>Step 3: Transfer BAC Water</span>
+                  <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                  Draw the calculated amount of BAC water (e.g. 2.0ml) into a large syringe or standard insulin syringe. Insert the needle into the peptide vial stopper, and slowly depress the plunger along the glass wall. Do not inject directly into the powder to prevent cellular structure shearing.
+                </div>
+              </div>
+
+              <div class="accordion-item">
+                <div class="accordion-header">
+                  <span>Step 4: Dissolve & Store</span>
+                  <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                  Remove the needle. Gently swirl the vial in circular motions until the lyophilized powder dissolves completely. Never shake the vial. Label with date and place in refrigeration (36°F–46°F / 2°C–8°C) immediately.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 4: Peptide Library -->
+          <div id="screen-library" class="screen">
+            <div class="screen-header">
+              <div>
+                <h1 class="screen-title">Library</h1>
+                <p class="screen-subtitle">Expert-vetted peptide profiles & mechanisms</p>
+              </div>
+            </div>
+
+            <!-- Search wrapper -->
+            <div class="search-wrapper">
+              <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <circle cx="11" cy="11" r="8" stroke-width="2"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65" stroke-width="2"/>
+              </svg>
+              <input type="text" id="library-search-input" class="search-input" placeholder="Search by name, goal, or mechanism..." autocomplete="off">
+            </div>
+
+            <!-- List container -->
+            <div id="library-peptides-list">
+              <!-- Populated dynamically via JS -->
+            </div>
+          </div>
+
+          <!-- TAB 5: Profile & Settings -->
+          <div id="screen-profile" class="screen">
+            <div class="screen-header">
+              <div>
+                <h1 class="screen-title">Profile</h1>
+                <p class="screen-subtitle">Your progress stats and local privacy tools</p>
+              </div>
+            </div>
+
+            <!-- Profile Info -->
+            <div class="profile-card">
+              <div class="profile-avatar" id="profile-avatar">A</div>
+              <div>
+                <h2 class="profile-name" id="profile-name">Alex</h2>
+                <span class="profile-goal-badge" id="profile-goal">Goal: Healing & Recovery</span>
+              </div>
+            </div>
+
+            <!-- History Calendar Component -->
+            <div class="calendar-card">
+              <div class="calendar-header">
+                <span class="calendar-month-title" id="calendar-month">June 2026</span>
+                <span style="font-size: 0.72rem; font-weight: 700; color: var(--success-color); display: flex; align-items: center; gap: 4px;">
+                  <span style="display:inline-block; width: 6px; height: 6px; border-radius:50%; background: var(--success-color);"></span>
+                  Log compliance
+                </span>
+              </div>
+              <div class="calendar-grid" id="calendar-grid-days">
+                <!-- Day titles -->
+                <span class="calendar-day-label">S</span>
+                <span class="calendar-day-label">M</span>
+                <span class="calendar-day-label">T</span>
+                <span class="calendar-day-label">W</span>
+                <span class="calendar-day-label">T</span>
+                <span class="calendar-day-label">F</span>
+                <span class="calendar-day-label">S</span>
+                <!-- Calendar grids rendered in JS -->
+              </div>
+            </div>
+
+            <!-- Health Outcomes Metrics Logger -->
+            <div class="card">
+              <h3 style="font-family: var(--font-heading); font-weight: 800; font-size: 0.95rem; margin-bottom: 12px; color: var(--accent-color);">Outcome Tracker</h3>
+              
+              <div class="metric-row">
+                <span class="metric-name">Body Weight</span>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span class="metric-value" id="metric-weight">-- lbs</span>
+                  <button class="btn btn-secondary metric-btn" id="btn-log-weight">Log</button>
+                </div>
+              </div>
+
+              <div class="metric-row">
+                <span class="metric-name">Energy Level</span>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span class="metric-value" id="metric-energy">-- / 10</span>
+                  <button class="btn btn-secondary metric-btn" id="btn-log-energy">Log</button>
+                </div>
+              </div>
+
+              <div class="metric-row">
+                <span class="metric-name">Joint/System Pain</span>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span class="metric-value" id="metric-pain">-- / 10</span>
+                  <button class="btn btn-secondary metric-btn" id="btn-log-pain">Log</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Local Storage Database Settings -->
+            <div class="checklist-title">PREMIUM SETTINGS & DATA PRIVACY</div>
+            <div class="settings-list" style="margin-bottom: 30px;">
+              
+              <!-- Dark theme switch -->
+              <div class="settings-item">
+                <div class="settings-info">
+                  <span class="settings-title">Dark Theme</span>
+                  <span class="settings-desc">Activate low-light organic green theme</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="settings-dark-theme-toggle">
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <!-- Database Reset -->
+              <div class="settings-item">
+                <div class="settings-info">
+                  <span class="settings-title">Local Health Data</span>
+                  <span class="settings-desc">Wipe all logs, local schedules and metrics</span>
+                </div>
+                <button class="btn btn-secondary" style="color: var(--accent-color); font-size: 0.75rem; font-weight: 700; padding: 8px 12px; border-radius: 10px;" id="btn-reset-db">Reset</button>
+              </div>
+              
+              <!-- Export DB -->
+              <div class="settings-item">
+                <div class="settings-info">
+                  <span class="settings-title">Export Encrypted Data</span>
+                  <span class="settings-desc">Download a local JSON copy of your logs</span>
+                </div>
+                <button class="btn btn-secondary" style="font-size: 0.75rem; font-weight: 700; padding: 8px 12px; border-radius: 10px;" id="btn-export-db">Export</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 3. Bottom Tab Bar Navigation -->
+        <nav class="bottom-nav">
+          <a class="nav-tab active" data-tab="today">
+            <svg viewBox="0 0 24 24">
+              <rect x="3" y="4" width="18" height="18" rx="4"/>
+              <path d="M16 2v4M8 2v4M3 10h18"/>
+            </svg>
+            <span>Today</span>
+          </a>
+          <a class="nav-tab" data-tab="explore">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/>
+            </svg>
+            <span>Explore</span>
+          </a>
+          <a class="nav-tab" data-tab="calculator">
+            <svg viewBox="0 0 24 24">
+              <line x1="6" y1="18" x2="18" y2="6" stroke-width="2"/>
+              <circle cx="6" cy="6" r="3" stroke-width="2"/>
+              <circle cx="18" cy="18" r="3" stroke-width="2"/>
+            </svg>
+            <span>Calculator</span>
+          </a>
+          <a class="nav-tab" data-tab="library">
+            <svg viewBox="0 0 24 24">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            </svg>
+            <span>Library</span>
+          </a>
+          <a class="nav-tab" data-tab="profile">
+            <svg viewBox="0 0 24 24">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+            <span>Profile</span>
+          </a>
+        </nav>
+
+        <!-- 4. Interactive Overlay for Protocol Details -->
+        <div id="protocol-detail-overlay" class="detail-overlay">
+          <div class="overlay-header">
+            <button class="btn-back" id="btn-protocol-detail-back">
+              <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+              <span>Back</span>
+            </button>
+            <span class="overlay-title" id="overlay-protocol-name">Wolverine Recovery Stack</span>
+            <span style="opacity:0; width: 40px;"></span>
+          </div>
+
+          <div class="overlay-body">
+            <!-- Details tabs -->
+            <div class="detail-tabs">
+              <span class="detail-tab active" data-detail-tab="schedule">Schedule</span>
+              <span class="detail-tab" data-detail-tab="learn">Learn</span>
+              <span class="detail-tab" data-detail-tab="sources">Sources</span>
+            </div>
+
+            <!-- Tab Content 1: Schedule -->
+            <div id="detail-tab-schedule" class="detail-tab-content active">
+              <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.4;" id="overlay-protocol-desc-text">Protocol description goes here.</p>
+              <div class="checklist-title">Weekly Dosing Checklist</div>
+              <div class="detail-peptides-list" id="overlay-peptides-list">
+                <!-- Dynamically populated peptide cards -->
+              </div>
+            </div>
+
+            <!-- Tab Content 2: Learn -->
+            <div id="detail-tab-learn" class="detail-tab-content">
+              <div class="detail-peptides-list" id="overlay-learn-list">
+                <!-- Dynamically populated mechanism descriptions -->
+              </div>
+            </div>
+
+            <!-- Tab Content 3: Sources -->
+            <div id="detail-tab-sources" class="detail-tab-content">
+              <ul class="sources-list" id="overlay-sources-list">
+                <!-- Dynamically populated citations -->
+              </ul>
+            </div>
+          </div>
+
+          <div class="action-bar">
+            <button class="btn btn-primary" id="btn-start-protocol" style="width: 100%;">Set as Active Protocol</button>
+          </div>
+        </div>
+
+        <!-- 5. Interactive Overlay for Scientific Peptide Details -->
+        <div id="peptide-detail-overlay" class="detail-overlay" style="z-index: 205;">
+          <div class="overlay-header">
+            <button class="btn-back" id="btn-peptide-detail-back">
+              <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+              <span>Back</span>
+            </button>
+            <span class="overlay-title" id="overlay-peptide-name">BPC-157</span>
+            <span style="opacity:0; width: 40px;"></span>
+          </div>
+
+          <div class="overlay-body">
+            <div style="background-color: var(--bg-secondary); padding: 18px; border-radius: 20px; border: 1px solid var(--border-color); margin-bottom: 20px; text-align: center;">
+              <span class="profile-goal-badge" id="overlay-pep-cat">Category: Healing</span>
+              <h2 style="font-family: var(--font-heading); font-weight: 800; font-size: 1.4rem; margin-top: 4px;" id="overlay-pep-fullname">Body Protection Compound</h2>
+              <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 6px;" id="overlay-pep-tagline">Accelerates healing...</p>
+            </div>
+
+            <div class="detail-tabs">
+              <span class="detail-tab active" data-pep-tab="science">Science</span>
+              <span class="detail-tab" data-pep-tab="dosing">Dosing</span>
+              <span class="detail-tab" data-pep-tab="safety">Safety</span>
+            </div>
+
+            <!-- Pep Tab 1: Science -->
+            <div id="pep-tab-science" class="detail-tab-content active">
+              <h4 style="font-family: var(--font-heading); font-weight: 800; font-size: 0.9rem; margin-bottom: 8px; color: var(--accent-color);">Mechanism of Action</h4>
+              <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;" id="overlay-pep-mechanism">Mechanism explanation.</p>
+              
+              <h4 style="font-family: var(--font-heading); font-weight: 800; font-size: 0.9rem; margin-bottom: 8px; color: var(--accent-color);">Reported Benefits</h4>
+              <ul class="sources-list" style="margin-bottom: 20px; padding-left: 20px;" id="overlay-pep-benefits">
+                <!-- Bullets -->
+              </ul>
+            </div>
+
+            <!-- Pep Tab 2: Dosing -->
+            <div id="pep-tab-dosing" class="detail-tab-content">
+              <h4 style="font-family: var(--font-heading); font-weight: 800; font-size: 0.9rem; margin-bottom: 8px; color: var(--accent-color);">Typical Dose Ranges</h4>
+              <div class="detail-peptides-list" style="margin-bottom: 16px;" id="overlay-pep-ranges">
+                <!-- Dose options -->
+              </div>
+
+              <h4 style="font-family: var(--font-heading); font-weight: 800; font-size: 0.9rem; margin-bottom: 8px; color: var(--accent-color);">Reconstitution Guidelines</h4>
+              <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5;" id="overlay-pep-recon">Guidelines.</p>
+            </div>
+
+            <!-- Pep Tab 3: Safety -->
+            <div id="pep-tab-safety" class="detail-tab-content">
+              <h4 style="font-family: var(--font-heading); font-weight: 800; font-size: 0.9rem; margin-bottom: 8px; color: var(--accent-color);">Side Effects & Contraindications</h4>
+              <ul class="sources-list" style="margin-bottom: 20px; padding-left: 20px;" id="overlay-pep-effects">
+                <!-- Bullets -->
+              </ul>
+
+              <h4 style="font-family: var(--font-heading); font-weight: 800; font-size: 0.9rem; margin-bottom: 8px; color: var(--accent-color);">Scientific References</h4>
+              <ul class="sources-list" id="overlay-pep-sources">
+                <!-- Citations -->
+              </ul>
+            </div>
+          </div>
+
+          <div class="action-bar">
+            <button class="btn btn-secondary" id="btn-pep-calc-redirect" style="width: 100%;">Open Reconstitution Calculator</button>
+          </div>
+        </div>
+
+        <!-- 6. Custom Protocol Builder Overlay Screen -->
+        <div id="protocol-builder-overlay" class="builder-overlay">
+          <div class="overlay-header">
+            <button class="btn-back" id="btn-builder-back">
+              <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+              <span>Cancel</span>
+            </button>
+            <span class="overlay-title">New Custom Stack</span>
+            <span style="opacity:0; width: 40px;"></span>
+          </div>
+
+          <div class="overlay-body">
+            <form id="custom-protocol-form">
+              <div class="form-group">
+                <label class="form-label">Protocol Name</label>
+                <input type="text" id="build-name" class="form-input" placeholder="e.g. My Injury Stack" required autocomplete="off">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Select Peptide</label>
+                <select id="build-peptide" class="form-input" style="font-weight:700;">
+                  <!-- Dynamically populated options -->
+                </select>
+              </div>
+
+              <div class="calc-grid">
+                <div class="form-group">
+                  <label class="form-label">Dose Amount</label>
+                  <input type="number" id="build-dose" class="form-input" value="250" required min="1">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Dose Unit</label>
+                  <select id="build-unit" class="form-input" style="font-weight:700;">
+                    <option value="mcg">mcg (micrograms)</option>
+                    <option value="mg">mg (milligrams)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Injection Frequency</label>
+                <select id="build-frequency" class="form-input" style="font-weight:700;">
+                  <option value="daily">Daily (Every day)</option>
+                  <option value="weekly">Once a Week</option>
+                  <option value="twice-weekly">Twice a Week (e.g. Tue & Fri)</option>
+                  <option value="cyclical">5 Days On / 2 Days Off</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Cycle Duration (Weeks)</label>
+                <input type="number" id="build-duration" class="form-input" value="8" required min="1" max="52">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Reminders</label>
+                <select id="build-reminder" class="form-input" style="font-weight:700;">
+                  <option value="morning">Morning (8:00 AM)</option>
+                  <option value="night">Night (10:00 PM)</option>
+                  <option value="afternoon">Afternoon (1:00 PM)</option>
+                </select>
+              </div>
+
+              <div style="margin-top: 25px; padding-bottom: 40px;">
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Create & Activate Stack</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- 7. Dynamic Modal Popups Overlay (Dialog component overlay) -->
+        <div id="modal-overlay" class="modal-overlay">
+          <div class="modal-card">
+            <h3 class="modal-title" id="modal-title">Log Metric</h3>
+            <p class="modal-desc" id="modal-desc">Enter the value to record in Local Storage.</p>
+            <div class="form-group" id="modal-input-container">
+              <!-- Rendered input depending on context -->
+            </div>
+            <div class="modal-actions">
+              <button class="btn btn-secondary" id="btn-modal-cancel" style="flex: 1; padding: 10px;">Cancel</button>
+              <button class="btn btn-primary" id="btn-modal-submit" style="flex: 1; padding: 10px;">Save</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
