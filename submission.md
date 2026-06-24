@@ -16,11 +16,9 @@ Here are the deliverables for the software developer task submission for the MVP
 ---
 
 ## 3. Video Walkthrough
-* **Walkthrough Video Link:** [Insert Loom, Drive, or YouTube link here]
+* **Walkthrough Video Link:** https://drive.google.com/file/d/14-anYR-1MGElMVC6vhjd3Pmxn8SzKOeS/view?usp=sharing
 
-*(To record this, run the local server at `http://localhost:8080` or open your live Vercel URL. Use a screen recorder like Loom or Windows Game Bar [Win + Alt + R] to show the 3-step onboarding flow, the today checklist logging doses with progress ring and confetti, the explore tab curated protocols, the scientific library details, and the dynamic SVG syringe calculator.)*
 
----
 
 ## MVP Technical Architecture Highlights
 
